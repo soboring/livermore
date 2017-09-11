@@ -42,6 +42,10 @@ float last_price=0;
 int g_calc_duration = 5;
 
 char g_calcDate[10] = {'\0'};
+char UpTrend_Date[10] = {'\0'};
+char NatReact_Date[10] = {'\0'};
+char NatRally_Date[10] = {'\0'};
+char DnTrend_Date[10] = {'\0'};
 char UpTrendPP_Date[10] = {'\0'};
 char NatReactPP_Date[10] = {'\0'};
 char NatRallyPP_Date[10] = {'\0'};
@@ -66,36 +70,36 @@ void livermore_reset_params()
         cout << "Trend switch from Down to Up" << endl;
         UpTrendPP_keep1 = UpTrendPP;
         NatReactPP_keep1 = NatReactPP;
-        //UpTrendPP = 0 ;
-        //NatReactPP = 0 ;
+        UpTrendPP = 0 ;
+        NatReactPP = 0 ;
 
         //UpTrend=0;
         //NatReact=0;
         //SecReact=0;
-        NatRally=0;
-        SecRally=0;
-        DnTrend=0;
+        //NatRally=0;
+        //SecRally=0;
+        //DnTrend=0;
 
-        memset(UpTrendPP_Date,'\0',sizeof(UpTrendPP_Date));
-        memset(NatReactPP_Date,'\0',sizeof(NatReactPP_Date));
+        memset(UpTrend_Date,'\0',sizeof(UpTrend_Date));
+        memset(NatReact_Date,'\0',sizeof(NatReact_Date));
         TrendSwitch = 0;
     }
     if(TrendSwitch == 2 ){  /* Switch to Dn Trend */
         cout << "Trend switch from Up to Down" << endl;
         DnTrendPP_keep1 = DnTrendPP;
         NatRallyPP_keep1 = NatRallyPP; 
-        //DnTrendPP = 0 ;
-        //NatRallyPP = 0 ;
+        DnTrendPP = 0 ;
+        NatRallyPP = 0 ;
 
-        UpTrend=0;
-        NatReact=0;
-        SecReact=0;
+        //UpTrend=0;
+        //NatReact=0;
+        //SecReact=0;
         //NatRally=0;
         //SecRally=0;
         //DnTrend=0;
 
-        memset(DnTrendPP_Date,'\0',sizeof(DnTrendPP_Date));
-        memset(NatRallyPP_Date,'\0',sizeof(NatRallyPP_Date));
+        memset(DnTrend_Date,'\0',sizeof(DnTrend_Date));
+        memset(NatRally_Date,'\0',sizeof(NatRally_Date));
         TrendSwitch = 0;
     }
 }
@@ -110,6 +114,7 @@ void process_state_1(float price)
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price ; 
+            safecpy(UpTrend_Date, g_calcDate);
         }
     }
     else  // price < last_price 
@@ -120,8 +125,9 @@ void process_state_1(float price)
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price ;
+            safecpy(DnTrend_Date, g_calcDate);
             UpTrendPP = UpTrend ;
-            safecpy(UpTrendPP_Date, g_calcDate);
+            safecpy(UpTrendPP_Date, UpTrend_Date);
         }
         else if ( InUpTrend && price < ( UpTrend / (1+ 1.5 * ThreshholdPct )))
         {
@@ -129,8 +135,9 @@ void process_state_1(float price)
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price ;
+            safecpy(DnTrend_Date, g_calcDate);
             UpTrendPP = UpTrend ;
-            safecpy(UpTrendPP_Date, g_calcDate);
+            safecpy(UpTrendPP_Date, UpTrend_Date);
             TrendSwitch = 2; /* switch to Down Trend */
         }
         else
@@ -142,15 +149,16 @@ void process_state_1(float price)
                     StateNo = 5;    // InNatReact 
                     NatReactReset = false;
                     NatReact = price ;
+                    safecpy(NatReact_Date, g_calcDate);
                     UpTrendPP = UpTrend;
-                    safecpy(UpTrendPP_Date, g_calcDate);
+                    safecpy(UpTrendPP_Date, UpTrend_Date);
                 }
                 else
                 {
                     StateNo = 4;   // InSecReact
                     SecReact = price ;
                     UpTrendPP = UpTrend; 
-                    safecpy(UpTrendPP_Date, g_calcDate);
+                    safecpy(UpTrendPP_Date, UpTrend_Date);
                 }
             }
         }
@@ -168,6 +176,7 @@ void process_state_2(float price) // State: InNatRally
            InUpTrend = true;
            InDnTrend = false;
            UpTrend = price;
+           safecpy(UpTrend_Date, g_calcDate);
         }
         else if (InDnTrend && price > DnTrend * ( 1 + 1.5 * ThreshholdPct))
         {
@@ -175,6 +184,7 @@ void process_state_2(float price) // State: InNatRally
            InUpTrend = true;
            InDnTrend = false;
            UpTrend = price;
+           safecpy(UpTrend_Date, g_calcDate);
            TrendSwitch = 1; /* switch to Up Trend */
         }
         else
@@ -183,6 +193,7 @@ void process_state_2(float price) // State: InNatRally
             {
                 StateNo=2 ; // InNatRally
                 NatRally = price ;
+                safecpy(NatRally_Date, g_calcDate);
             }
         }
     }
@@ -194,8 +205,9 @@ void process_state_2(float price) // State: InNatRally
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
             NatRallyPP = NatRally;
-            safecpy(NatRallyPP_Date, g_calcDate);
+            safecpy(NatRallyPP_Date, NatRally_Date);
         }
         else if(InUpTrend && price < ( UpTrend / ( 1+1.5*ThreshholdPct)))
         {
@@ -203,8 +215,9 @@ void process_state_2(float price) // State: InNatRally
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
             NatRallyPP = NatRally;
-            safecpy(NatRallyPP_Date, g_calcDate);
+            safecpy(NatRallyPP_Date, NatRally_Date);
             TrendSwitch = 2; /* switch to Down Trend */
         }
         else
@@ -216,15 +229,16 @@ void process_state_2(float price) // State: InNatRally
                     StateNo=5; //InNatReact
                     NatReactReset= false;
                     NatReact = price ;
+                    safecpy(NatReact_Date, g_calcDate);
                     NatRallyPP = NatRally;
-                    safecpy(NatRallyPP_Date, g_calcDate);
+                    safecpy(NatRallyPP_Date, NatRally_Date);
                 }
                 else
                 {
                     StateNo=4; // InSecReact
                     SecReact = price;
                     NatRallyPP = NatRally;
-                    safecpy(NatRallyPP_Date, g_calcDate);
+                    safecpy(NatRallyPP_Date, NatRally_Date);
                 }
             }
         }
@@ -241,6 +255,7 @@ void process_state_3(float price) // State: InSecRally
            InUpTrend = true;
            InDnTrend = false;
            UpTrend = price;
+           safecpy(UpTrend_Date, g_calcDate);
         }
         else if(InDnTrend && price > DnTrend * ( 1 + 1.5 * ThreshholdPct))
         {
@@ -248,6 +263,7 @@ void process_state_3(float price) // State: InSecRally
            InUpTrend = true;
            InDnTrend = false;
            UpTrend = price;
+           safecpy(UpTrend_Date, g_calcDate);
            TrendSwitch = 1; /* switch to Up Trend */
         }
         else
@@ -256,6 +272,7 @@ void process_state_3(float price) // State: InSecRally
             {
                 StateNo=2 ; // InNatRally
                 NatRally = price ;
+                safecpy(NatRally_Date, g_calcDate);
             }
             else if ( price > SecRally)
             {
@@ -272,6 +289,7 @@ void process_state_3(float price) // State: InSecRally
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
         }
         else if( InUpTrend && price < ( UpTrend / ( 1+1.5 * ThreshholdPct )))
         {
@@ -279,6 +297,7 @@ void process_state_3(float price) // State: InSecRally
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
             TrendSwitch = 2; /* switch to Down Trend */
         }
         else
@@ -289,6 +308,7 @@ void process_state_3(float price) // State: InSecRally
                 {
                     StateNo=5; //InNatReact
                     NatReact = price ;
+                    safecpy(NatReact_Date, g_calcDate);
                 }
                 else
                 {
@@ -309,6 +329,7 @@ void process_state_4(float price) // State: InSecReact
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
         }
         else if(InDnTrend && price > DnTrend * ( 1 + 1.5 * ThreshholdPct))
         {
@@ -316,6 +337,7 @@ void process_state_4(float price) // State: InSecReact
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
             TrendSwitch = 1; /* switch to Up Trend */
         }
         else
@@ -326,6 +348,7 @@ void process_state_4(float price) // State: InSecReact
                 {
                     StateNo=2 ; // InNatRally
                     NatRally = price ;
+                    safecpy(NatRally_Date, g_calcDate);
                 }
                 else
                 {
@@ -343,6 +366,7 @@ void process_state_4(float price) // State: InSecReact
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
         }
         else if(InUpTrend && price < ( UpTrend / ( 1+ 1.5 *ThreshholdPct)))
         {
@@ -350,6 +374,7 @@ void process_state_4(float price) // State: InSecReact
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
             TrendSwitch = 2; /* switch to Down Trend */
         }
         else
@@ -358,6 +383,7 @@ void process_state_4(float price) // State: InSecReact
             {
                 StateNo=5; //InNatReact
                 NatReact = price ;
+                safecpy(NatReact_Date, g_calcDate);
             }
             else
             {
@@ -380,8 +406,9 @@ void process_state_5(float price) // State: InNatReact
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
             NatReactPP = NatReact;
-            safecpy(NatReactPP_Date, g_calcDate);
+            safecpy(NatReactPP_Date, NatReact_Date);
         }
         else if(InDnTrend && price > DnTrend * ( 1 + 1.5 * ThreshholdPct))
         {
@@ -389,8 +416,9 @@ void process_state_5(float price) // State: InNatReact
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
             NatReactPP = NatReact;
-            safecpy(NatReactPP_Date, g_calcDate);
+            safecpy(NatReactPP_Date, NatReact_Date);
             TrendSwitch = 1; /* switch to Up Trend */
         }
         else
@@ -402,15 +430,16 @@ void process_state_5(float price) // State: InNatReact
                     StateNo=2 ; // InNatRally
                     NatRallyReset = false;
                     NatRally = price ;
+                    safecpy(NatRally_Date, g_calcDate);
                     NatReactPP = NatReact;
-                    safecpy(NatReactPP_Date, g_calcDate);
+                    safecpy(NatReactPP_Date, NatReact_Date);
                 }
                 else
                 {
                     StateNo=3 ; // InSecRally
                     SecRally = price ;
                     NatReactPP = NatReact;
-                    safecpy(NatReactPP_Date, g_calcDate);
+                    safecpy(NatReactPP_Date, NatReact_Date);
                 }
             }
         }
@@ -423,6 +452,7 @@ void process_state_5(float price) // State: InNatReact
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
         }
         else if(InUpTrend && price < ( UpTrend / ( 1+1.5*ThreshholdPct)))
         {
@@ -430,6 +460,7 @@ void process_state_5(float price) // State: InNatReact
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
             TrendSwitch = 2; /* switch to Down Trend */
         }
         else
@@ -438,6 +469,7 @@ void process_state_5(float price) // State: InNatReact
             {
                 StateNo=5; //InNatReact
                 NatReact = price ;
+                safecpy(NatReact_Date, g_calcDate);
             }
         }
     }
@@ -452,8 +484,9 @@ void process_state_6(float price) // State: InDnTrend
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
             DnTrendPP = DnTrend;
-            safecpy(DnTrendPP_Date, g_calcDate);
+            safecpy(DnTrendPP_Date, DnTrend_Date);
         }
         else if(InDnTrend && price > DnTrend * ( 1 + 1.5 * ThreshholdPct))
         {
@@ -461,8 +494,9 @@ void process_state_6(float price) // State: InDnTrend
             InUpTrend = true;
             InDnTrend = false;
             UpTrend = price;
+            safecpy(UpTrend_Date, g_calcDate);
             DnTrendPP = DnTrend;
-            safecpy(DnTrendPP_Date, g_calcDate);
+            safecpy(DnTrendPP_Date, DnTrend_Date);
             TrendSwitch = 1; /* switch to Up Trend */
         }
         else
@@ -474,15 +508,16 @@ void process_state_6(float price) // State: InDnTrend
                     StateNo=2 ; // InNatRally
                     NatRallyReset = false;
                     NatRally = price ;
+                    safecpy(NatRally_Date, g_calcDate);
                     DnTrendPP = DnTrend;
-                    safecpy(DnTrendPP_Date, g_calcDate);
+                    safecpy(DnTrendPP_Date, DnTrend_Date);
                 }
                 else
                 {
                     StateNo=3 ; // InSecRally
                     SecRally = price ;
                     DnTrendPP = DnTrend;
-                    safecpy(DnTrendPP_Date, g_calcDate);
+                    safecpy(DnTrendPP_Date, DnTrend_Date);
                 }
             }
         }
@@ -495,6 +530,7 @@ void process_state_6(float price) // State: InDnTrend
             InDnTrend = true;
             InUpTrend = false;
             DnTrend = price;
+            safecpy(DnTrend_Date, g_calcDate);
         }
     }
 }
